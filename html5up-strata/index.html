@@ -67,6 +67,199 @@
 								<h3>結果展示</h3>
 								<p>搜尋到的相關資料輸出</p>
 							</article>
+							<code class="language-python">from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+import time
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+import pandas as pd
+
+def extract_books_data():
+    """提取書籍資料的函數"""
+    time.sleep(2)
+    book_items = driver.find_elements(By.CSS_SELECTOR, ".item")
+    
+    for item in book_items:
+        try:
+            # 書名和連結
+            title_element = item.find_element(By.CSS_SELECTOR, "h4 a")
+            title = title_element.text.strip()
+            book_link = title_element.get_attribute("href")
+            
+            # 作者
+            try:
+                author_element = item.find_element(By.CSS_SELECTOR, "ul li:first-child a")
+                author = author_element.text.strip()
+            except NoSuchElementException:
+                author = "未知作者"
+            
+            # 價格
+            try:
+                price_element = item.find_element(By.CSS_SELECTOR, ".price_a b")
+                price = price_element.text.strip()
+            except NoSuchElementException:
+                price = "價格未顯示"
+            
+            # 計算排名
+            rank = len(books_data) + 1
+            
+            book_info = {
+                "排名": rank,
+                "書名": title,
+                "作者": author,
+                "價格": price,
+                "連結": book_link
+            }
+            
+            books_data.append(book_info)
+            print(f"第{rank}名: {title} - {author}")
+            
+        except Exception as e:
+            print(f"抓取錯誤: {e}")
+            continue
+
+# 設定瀏覽器
+options = webdriver.ChromeOptions()
+options.add_argument("--disable-blink-features=AutomationControlled")
+
+driver = webdriver.Chrome(
+    service=Service(ChromeDriverManager().install()),
+    options=options
+)
+
+try:
+    # 前往博客來暢銷書頁面
+    driver.get("https://www.books.com.tw/web/sys_saletopb/books/")
+    driver.maximize_window()
+    time.sleep(3)
+    
+    books_data = []
+    pages_to_scrape = 3
+    current_page = 1
+    
+    while current_page <= pages_to_scrape:
+        print(f"正在爬取第 {current_page} 頁...")
+        extract_books_data()
+        
+        if current_page < pages_to_scrape:
+            try:
+                next_button = driver.find_element(By.CSS_SELECTOR, "a[aria-label='前往下一頁']")
+                if next_button.is_enabled():
+                    driver.execute_script("arguments[0].click();", next_button)
+                    time.sleep(3)
+                    current_page += 1
+                else:
+                    break
+            except NoSuchElementException:
+                break
+        else:
+            break
+    
+    print(f"總共爬取了 {len(books_data)} 本書")
+    
+finally:
+    driver.quit()
+
+# 儲存資料
+if books_data:
+    df = pd.DataFrame(books_data)
+    df.to_csv("博客來暢銷書排行榜.csv", index=False, encoding='utf-8-sig')
+    df.to_excel("博客來暢銷書排行榜.xlsx", index=False)
+    print("檔案儲存完成！")</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-project">
+                    <h3>🏛️ 台北開放資料爬蟲工具</h3>
+                    <div class="description">
+                        專為台北市政府開放資料平台設計的爬蟲工具，能夠根據關鍵字搜尋相關的開放資料集，自動翻頁並提取資料標題與連結。這個工具對於研究者和資料分析師來說非常實用，可以快速蒐集政府開放資料。
+                    </div>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Selenium</span>
+                        <span class="tech-tag">CSS Selector</span>
+                        <span class="tech-tag">Data Collection</span>
+                    </div>
+                    <button class="code-toggle" onclick="toggleCode('code2')">查看程式碼</button>
+                    <div id="code2" class="code-block hidden">
+                        <div class="code-header">taipei_data_scraper.py</div>
+                        <div class="code-content">
+                            <pre><code class="language-python">from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+
+def extract_page_data():
+    """提取頁面資料的函數"""
+    time.sleep(1)
+    items = driver.find_elements(By.CSS_SELECTOR, ".dataset-title")
+    
+    for item in items:
+        title_element = item.find_element(By.TAG_NAME, "a")
+        title = title_element.text
+        link = title_element.get_attribute("href")
+        data_list.append({"標題": title, "連結": link})
+        print(f"標題: {title}")
+        print(f"連結: {link}")
+        print("-" * 50)
+
+# 設定瀏覽器選項
+options = webdriver.ChromeOptions()
+options.add_argument("--disable-blink-features=AutomationControlled")
+
+driver = webdriver.Chrome(
+    service=Service(ChromeDriverManager().install()),
+    options=options
+)
+
+try:
+    # 前往台北市政府開放資料平台
+    driver.get("https://data.taipei/")
+    driver.maximize_window()
+    
+    # 搜尋關鍵字
+    search_box = driver.find_element(By.ID, "input-8")
+    search_box.send_keys("捷運")
+    search_box.send_keys(Keys.ENTER)
+    
+    # 存放資料的清單
+    data_list = []
+    
+    # 爬取多頁資料
+    count = 0
+    while count < 3:
+        time.sleep(2)
+        extract_page_data()
+        
+        try:
+            next_button = driver.find_element(By.CSS_SELECTOR, "button[aria-label='Next page']")
+            if next_button.is_enabled():
+                next_button.click()
+            else:
+                print("已到達最後一頁")
+                break
+        except (NoSuchElementException, ElementNotInteractableException):
+            print("找不到下一頁按鈕")
+            break
+        
+        count += 1
+    
+    print(f"\n總共爬取了 {len(data_list)} 筆資料")
+
+finally:
+    driver.quit()
+
+# 將資料轉換為 DataFrame
+import pandas as pd
+if data_list:
+    df = pd.DataFrame(data_list)
+    df.to_csv("台北開放資料.csv", index=False, encoding='utf-8-sig')
+    print("資料已儲存為 CSV 檔案")</code>
 						</div>
 						
 					</section>
