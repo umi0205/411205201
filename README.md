@@ -25,7 +25,7 @@
 [博客來中文書暢銷排行榜](https://www.books.com.tw/web/sys_saletopb/books/)
 
 **資料截圖預覽：**  
-![博客來截圖範例]([https://github.com/umi0205/411205201/raw/main/images/book_example.png](https://raw.githubusercontent.com/umi0205/411205201/refs/heads/main/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-06-05%20131001.png))  
+![博客來截圖範例](https://raw.githubusercontent.com/umi0205/411205201/refs/heads/main/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-06-05%20131001.png)  
 
 
 ## 👤 作者與聯絡方式
